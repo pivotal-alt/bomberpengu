@@ -8,8 +8,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "vite",
     "build": "tsc && vite build",
-    "preview": "vite previeww"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@ruffle-rs/ruffle": "^0.1.0-nightly.2024.6.11"
@@ -18,8 +19,5 @@
     "typescript": "^5.4.5",
     "vite": "^5.2.13",
     "vite-plugin-static-copy": "^1.0.5"
-  },
-  "stackblitz": {
-    "startCommand": "yarn dev"
   }
 }

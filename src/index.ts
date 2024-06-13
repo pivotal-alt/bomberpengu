@@ -1,3 +1,6 @@
+import "./lib/ruffle-net/polyfill"
+import "./index.css"
+
 window.addEventListener('load', (_event) => {
   const ruffle = window.RufflePlayer.newest();
   const player = ruffle.createPlayer();
@@ -14,12 +17,5 @@ window.addEventListener('load', (_event) => {
     },
     autoplay: 'on',
     logLevel: new URLSearchParams(location.search).get('logLevel') ?? 'error',
-    socketProxy: [
-      {
-        host: 'pengu.test',
-        port: 1234,
-        proxyUrl: 'ws://pengu.test:1234',
-      },
-    ],
   });
 });

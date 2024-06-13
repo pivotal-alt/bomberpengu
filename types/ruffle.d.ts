@@ -5,9 +5,18 @@ declare global {
   
   interface RufflePlayerInstance {
     createPlayer: () => RufflePlayerComponent
+    version: string
+  }
+
+  interface RufflePlayerConfig {
+    socketProxy?: any[]
   }
 
   interface RufflePlayer {
+    config?: RufflePlayerConfig
+    sources: {
+      local: RufflePlayerInstance
+    }
     newest: () => RufflePlayerInstance
   }
 
