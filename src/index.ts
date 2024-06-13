@@ -1,5 +1,19 @@
-import "./lib/ruffle-net/polyfill"
 import "./index.css"
+import { registerHandler } from "./lib/ws-mock"
+
+registerHandler({
+  host: "pengu.test",
+  port: 1234,
+  onSend(socket, data) {
+    console.log("Send:", socket, data)
+    setTimeout(() => {
+      socket.recv('<msgAll name="foo" msg"="hehe" />\0')
+    }, 100)
+  },
+  onRecv(socket, data) {
+    console.log("Recv:", socket, data)
+  }
+})
 
 window.addEventListener('load', (_event) => {
   const ruffle = window.RufflePlayer.newest();
@@ -17,5 +31,12 @@ window.addEventListener('load', (_event) => {
     },
     autoplay: 'on',
     logLevel: new URLSearchParams(location.search).get('logLevel') ?? 'error',
+    socketProxy: [
+      {
+        host: 'pengu.test',
+        port: 1234,
+        proxyUrl: 'wss://pengu.test:1234',
+      },
+    ],
   });
 });
