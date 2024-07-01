@@ -58,6 +58,14 @@ export class WebSocketClient extends EventEmitter {
   }
 
   send(data: String | ArrayBuffer | ArrayBufferTypes) {
+    if (this.binaryType === "arraybuffer") {
+      if (typeof data === "string") {
+        data = new TextEncoder().encode(data).buffer
+      } else if (ArrayBuffer.isView(data)) {
+        data = data.buffer
+      }
+    }
+
     setTimeout(() => {
       this.emit('send', data); // Custom send event
     }, 1);
@@ -148,8 +156,18 @@ export class WebSocketServer extends EventEmitter {
       CLOSING: 2 = 2;
       CLOSED: 3 = 3;
 
+      _binaryType: BinaryType = 'blob';
+
+      get binaryType() { return this._binaryType }
+      set binaryType(binaryType: BinaryType) {
+        this._binaryType = binaryType
+
+        if (binaryType === 'arraybuffer') {
+          this.wsClient.binaryType = binaryType
+        }
+      }
+
       readonly bufferedAmount = 0;
-      binaryType: BinaryType = 'blob';
       protocol = '';
       readyState = 0;
       url = '';
@@ -195,6 +213,8 @@ export class WebSocketServer extends EventEmitter {
         });
 
         this.wsClient.on('send', (data) => {
+
+          
           const event = new MessageEvent("message", { data })
           this.dispatchEvent(event)
         })
@@ -257,6 +277,14 @@ export class WebSocketServer extends EventEmitter {
         }
         else if (data instanceof ArrayBuffer) {
           data = data.slice(0)
+        }
+
+        if (this.binaryType === "arraybuffer") {
+          if (typeof data === "string") {
+            data = new TextEncoder().encode(data).buffer
+          } else if (ArrayBuffer.isView(data)) {
+            data = data.buffer
+          }
         }
 
         setTimeout(() => {

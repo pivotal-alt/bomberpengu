@@ -1,8 +1,9 @@
 import { XMLParser } from "fast-xml-parser"
 import { WebSocketServer, WebSocketClient } from "./lib/ws-browser-mock"
 
+class BomberPenguGame {}
 
-export class BomberpenguServer {
+export class BomberPenguServer {
   _server: WebSocketServer
   _xmlParser  = new XMLParser({
     allowBooleanAttributes: true,
@@ -16,14 +17,37 @@ export class BomberpenguServer {
     this._server.on('connection', this._onSocket.bind(this))
   }
 
+  _sendXml(xml: string, socket: WebSocketClient) {
+    socket.send(xml.replace(/\0*$/, '\0'))
+  }
+
+  _sendError(error: string, socket: WebSocketClient) {
+    this._sendXml(`<errorMsg>${error}</errorMsg>`, socket)
+  }
+
   _onSocket(socket: WebSocketClient) {
-    console.log('Client connected')
+    let user: { username: string } | null = null
+    let game: BomberPenguGame | null = null
     
     socket.on('message', (data: ArrayBuffer) => {
       const xmlStr = new TextDecoder().decode(data).slice(0, -1)
       const xml = this._xmlParser.parse(xmlStr)
+
+      if (!user && !xml.auth) {
+        this._sendError('Not logged in', socket)
+        return
+      }
       
-      PARSEN!
+      if (xml.auth) {
+        const { name } = xml.auth
+        const [username, _password] = name.split(':')
+        user = { username }
+      }
+      if (xml.challenge) {
+        const { name } = xml.challenge
+
+        PARSE
+      }
     })
 
     socket.on('close', () => {
@@ -32,4 +56,4 @@ export class BomberpenguServer {
   }
 }
 
-export default new BomberpenguServer('pengu.test', 1234)
+export default new BomberPenguServer('pengu.test', 1234)
