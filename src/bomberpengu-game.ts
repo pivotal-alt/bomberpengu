@@ -73,7 +73,7 @@ export class BomberPenguPlayer extends EventEmitter {
 export class BomberPenguGame extends EventEmitter {
   started = false
   players: BomberPenguPlayer[] = []
-  seed: string = ""
+  seed: number = -1
   
   constructor() {
     super()
@@ -85,8 +85,9 @@ export class BomberPenguGame extends EventEmitter {
     this.emit('playerAdded', player)
   }
 
-  start() {
+  start(seed: number) {
     if (this.started) throw new Error('Game already started')
+    this.seed = seed
     this.started = true
 
     setTimeout(() => {

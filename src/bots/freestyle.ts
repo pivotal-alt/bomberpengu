@@ -14,7 +14,7 @@ export class FreestyleBot {
     if (this.#game.started) this.onStart()
   }
 
-  onStart() {
+  async onStart() {
     for (const player of this.#game.players) {
       if (player.name === FreestyleBot.name) {
         this.#me = player
@@ -25,8 +25,9 @@ export class FreestyleBot {
 
     if (!this.#me || !this.#enemy) throw new Error('Missing player for start')
     
+    await new Promise(resolve => setTimeout(resolve, 1))
     const x = MAP_OFFSET_X - MAP_BLOCK_SIZE
-    const y = MAP_OFFSET_Y + MAP_HEIGHT - MAP_BLOCK_SIZE
+    const y = MAP_OFFSET_Y + MAP_HEIGHT
     this.#me.setPos(x, y)
   }
 

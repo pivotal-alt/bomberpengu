@@ -32,14 +32,11 @@ export class BomberPenguServer {
     let user: { username: string } | null = null
     let game: BomberPenguGame | null = null
     
-    socket.on('message', (data: ArrayBuffer) => {
+    socket.on('message', async (data: ArrayBuffer) => {
       const xmlStr = new TextDecoder().decode(data).slice(0, -1)
       const xml = this._xmlParser.parse(xmlStr)
 
-      if (!user && !xml.auth) {
-        this._sendError('Not logged in', socket)
-        return
-      }
+      console.log(xml)
       
       if (xml.auth) {
         const { name } = xml.auth
@@ -49,10 +46,52 @@ export class BomberPenguServer {
         }
 
         user = { username }
+        
+        for (const bot of Object.values(bots)) {
+          this._sendXml(`<newPlayer name="${bot.name}" skill="0/0/0" state="0" />`, socket)
+        }
       }
+
+      if (!user) {
+        this._sendError('Not logged in', socket)
+        return
+      }
+
       if (xml.challenge) {
         const { name } = xml.challenge
 
+        if (game) return this._sendError('Already in game', socket)
+
+        const botMode = name.startsWith('[Bot]')
+        const me = new BomberPenguPlayer(user.username)
+        const enemy = new BomberPenguPlayer(name)
+        game = new BomberPenguGame()
+        game.addPlayer(me)
+        game.addPlayer(enemy)
+
+        if (botMode) {
+          const BotClass = Object.values(bots).find(e => e.name === name)
+          if (!BotClass) {
+            game = null
+            return this._sendError('Invalid bot', socket)
+          }
+
+          const bot = new BotClass(game)
+
+          const seed = Math.floor(Math.random() * 20000)
+          this._sendXml(`<startGame name="${name}" />`, socket)
+          await new Promise(resolve => setTimeout(resolve, 100))
+          this._sendXml(`<16 s="${seed}" />`, socket)
+
+          enemy.on('move', ({ x, y }) => {
+            this._sendXml(`<12 x="${x}" y="${y}" c="0000" />`, socket)
+          })
+
+          game.start(seed)
+        } else {
+          game = null
+          return this._sendError('NOT IMPLEMENTED', socket)
+        }
       }
     })
 
