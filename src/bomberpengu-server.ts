@@ -1,7 +1,10 @@
 import { XMLParser } from "fast-xml-parser"
 import { WebSocketServer, WebSocketClient } from "./lib/ws-browser-mock"
+import { BomberPenguGame, BomberPenguPlayer } from "./bomberpengu-game"
+import { } from './constants'
+import * as bots from './bots'
 
-class BomberPenguGame {}
+const botMap = Object.values(bots).map(e => e.name)
 
 export class BomberPenguServer {
   _server: WebSocketServer
@@ -41,12 +44,15 @@ export class BomberPenguServer {
       if (xml.auth) {
         const { name } = xml.auth
         const [username, _password] = name.split(':')
+        if (username.startsWith('[Bot]')) {
+          return this._sendError('Invalid username', socket)
+        }
+
         user = { username }
       }
       if (xml.challenge) {
         const { name } = xml.challenge
 
-        PARSE
       }
     })
 
